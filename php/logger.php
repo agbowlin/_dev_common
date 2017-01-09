@@ -1,15 +1,20 @@
 <?php
 
 
+$Logger = new Logger();
+
+
 class Logger
 {
 
 	//---------------------------------------------------------------------
 	public $LogGroup			= '';
 	public $LogLevels			= 'TDIWE';
-	public $LogTimestamp		= true;
-	// public $LogAggregate		= true;
 	public $LogAggregateServer	= '';
+
+	public $OutputGroup			= true;
+	public $OutputTime			= true;
+	public $OutputLevel			= true;
 
 
 	//---------------------------------------------------------------------
@@ -17,16 +22,20 @@ class Logger
 	{
 		// The ISO-8601 date (e.g. 2013-05-05T16:34:42+00:00)
 		// return date('c');
+		$date = date_create();
 		$microseconds = microtime();
 		$microseconds = substr( $microseconds, 2, 4 );
-		$date = date_create();
-		return date_format( $date, 'Y-m-d H:i:s.'.$microseconds.' O' );
+		$date_format_string = 'Y-m-d H:i:s.'.$microseconds.' O';
+		return date_format( $date, $date_format_string );
 	}
 	
 	
 	//---------------------------------------------------------------------
 	public function SendLogAggregator( $Group, $Level, $Timestamp, $Message )
 	{
+		if( !$this->LogAggregateServer ) { return; }
+		if( strlen( $this->LogAggregateServer ) == 0 ) { return; }
+		
 		// $url = 'http://logagg.liquicode.com/submit.php';
 		$params = array
 				(
@@ -69,7 +78,7 @@ class Logger
 	
 	
 	//---------------------------------------------------------------------
-	public function LogMessage($Message, $Level = 'INFO' )
+	public function LogMessage($Message, $Level = 'INFO', $ExtraData = null )
 	{
 		$this_timestamp = $this->GetTimestamp();
 
@@ -81,7 +90,7 @@ class Logger
 			return null;
 		}
 
-		// Process message.
+		// Get the log level.
 		if    ( $log_level == 'T' ) { $log_level = 'TRACE'; }
 		elseif( $log_level == 'D' ) { $log_level = 'DEBUG'; }
 		elseif( $log_level == 'I' ) { $log_level = 'INFO '; }
@@ -91,46 +100,78 @@ class Logger
 
 		// Construct the output message.
 		$out_message = '';
-		if( $this->LogTimestamp )
+		$left_side = ' | ';
+		$right_side = '';
+		if( $this->OutputGroup )
 		{
-			$out_message .= '====[ '.$this_timestamp.' ] ';
+			$out_message .= $left_side.$this->LogGroup.$right_side;
 		}
-		$out_message .= '====[ '.$log_level.' ] ';
-		$out_message .= $Message;
-		
+		if( $this->OutputTime )
+		{
+			$out_message .= $left_side.$this_timestamp.$right_side;
+		}
+		if( $this->OutputLevel )
+		{
+			$out_message .= $left_side.$log_level.$right_side;
+		}
+		$out_message .= $left_side.$Message;
+
+		// Add the extra data.
+		if( $ExtraData )
+		{
+			$out_message .= "\n".json_encode( $ExtraData, JSON_PRETTY_PRINT );
+		}
+
 		// Send message to the console.
+		if( ($log_level == 'WARN') || ($log_level == 'ERROR') )
+		{
+			console.error_log( $out_message );
+		}
 		echo $out_message."\n";
 		
-		if( $this->LogAggregateServer && (strlen( $this->LogAggregateServer ) > 0) )
-		{
-			$this->SendLogAggregator( $this->LogGroup, $Level, $this_timestamp, $Message );
-		}
-		
+		// Send message to the log aggregator.
+		$this->SendLogAggregator( $this->LogGroup, $Level, $this_timestamp, $Message );
+
 		// Return the message.
 		return $out_message;
 	}
 	
 
 	//---------------------------------------------------------------------
-	public function LogTrace( $Message )
+	public function LogTrace( $Message, $ExtraData = null )
 	{
-		return $this->LogMessage( $Message, 'TRACE' );
+		return $this->LogMessage( $Message, 'TRACE', $ExtraData );
 	}
-	public function LogDebug( $Message )
+	public function LogDebug( $Message, $ExtraData = null )
 	{
-		return $this->LogMessage( $Message, 'DEBUG' );
+		return $this->LogMessage( $Message, 'DEBUG', $ExtraData );
 	}
-	public function LogInfo( $Message )
+	public function LogInfo( $Message, $ExtraData = null )
 	{
-		return $this->LogMessage( $Message, 'INFO' );
+		return $this->LogMessage( $Message, 'INFO', $ExtraData );
 	}
-	public function LogWarning( $Message )
+	public function LogWarn( $Message, $ExtraData = null )
 	{
-		return $this->LogMessage( $Message, 'WARN' );
+		return $this->LogMessage( $Message, 'WARN', $ExtraData );
 	}
-	public function LogError( $Message )
+	public function LogWarning( $Message, $ExtraData = null )
 	{
-		return $this->LogMessage( $Message, 'ERROR' );
+		return $this->LogMessage( $Message, 'WARN', $ExtraData );
+	}
+	public function LogError( $Message, $ExtraData = null )
+	{
+		return $this->LogMessage( $Message, 'ERROR', $ExtraData );
+	}
+
+
+	//---------------------------------------------------------------------
+	public function LogBlank( $Level = 'INFO' )
+	{
+		return $this->LogMessage( '', $Level );
+	}
+	public function LogSeparator( $Level = 'INFO' )
+	{
+		return $this->LogMessage( '==========================================', $Level );
 	}
 	
 	
