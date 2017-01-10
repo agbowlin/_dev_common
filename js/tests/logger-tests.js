@@ -1,6 +1,14 @@
-var Logger = require('../logger');
+var Logger = require('../logger').Logger;
 
-Logger.LogGroup = 'Test Group';
+// var console_log_target = {};
+var console_log_target = Logger.AddLogTarget('console');
+// var console_log_target = Logger.Config.targets[0];
+
+var file_log_target = Logger.AddLogTarget('file');
+// file_log_target.log_filename = 'logger-tests';
+// file_log_target.log_extension = 'log';
+
+Logger.Config.group = 'Test Group';
 
 Logger.LogTrace("This is an Trace message.");
 Logger.LogDebug("This is an Debug message.");
@@ -8,8 +16,9 @@ Logger.LogInfo("This is an Info message.");
 Logger.LogWarning("This is an Warn message.");
 Logger.LogError("This is an Error message.");
 
-Logger.LogSeparator();
-Logger.LogLevels = 'IWE';
+//==========================================
+Logger.LogSeparatorLine();
+console_log_target.log_levels = 'IWE';
 
 Logger.LogTrace("This is an Trace message. SHOULD NOT SEE THIS MESSAGE.");
 Logger.LogDebug("This is an Debug message. SHOULD NOT SEE THIS MESSAGE.");
@@ -17,62 +26,61 @@ Logger.LogInfo("This is an Info message.");
 Logger.LogWarning("This is an Warn message.");
 Logger.LogError("This is an Error message.");
 
-Logger.LogSeparator();
+//==========================================
+Logger.LogSeparatorLine();
 var obj = {
 	Field1: 'Foo',
 	Field2: 'Bar'
 };
-Logger.LogInfo("Here is some data:", obj);
+Logger.LogInfo("Here is some extra data:", obj);
 
-Logger.LogSeparator();
-Logger.LogLevels = 'TDIWE';
+//==========================================
+Logger.LogSeparatorLine();
+console_log_target.log_levels = 'TDIWE';
 
-Logger.OutputGroup = false;
-Logger.OutputTime = false;
-Logger.OutputLevel = false;
+console_log_target.output_group = false;
+console_log_target.output_date = false;
+console_log_target.output_time = false;
+console_log_target.output_milliseconds = false;
+console_log_target.output_timezone = false;
+console_log_target.output_severity = false;
+console_log_target.output_severity_words = false;
 Logger.LogInfo("This message has no output header fields.");
 
-Logger.OutputGroup = true;
-Logger.OutputTime = false;
-Logger.OutputLevel = false;
+console_log_target.output_group = true;
 Logger.LogInfo("This message has: Group.");
 
-Logger.OutputGroup = false;
-Logger.OutputTime = true;
-Logger.OutputLevel = false;
-Logger.LogInfo("This message has: Time.");
+console_log_target.output_date = true;
+Logger.LogInfo("This message has: Group, Date.");
 
-Logger.OutputGroup = false;
-Logger.OutputTime = false;
-Logger.OutputLevel = true;
-Logger.LogInfo("This message has: Level.");
+console_log_target.output_time = true;
+Logger.LogInfo("This message has: Group, Date, Time.");
 
-Logger.OutputGroup = true;
-Logger.OutputTime = true;
-Logger.OutputLevel = false;
-Logger.LogInfo("This message has: Group, Time.");
+console_log_target.output_milliseconds = true;
+Logger.LogInfo("This message has: Group, Date, Time, Milliseconds.");
 
-Logger.OutputGroup = false;
-Logger.OutputTime = true;
-Logger.OutputLevel = true;
-Logger.LogInfo("This message has: Time, Level.");
+console_log_target.output_timezone = true;
+Logger.LogInfo("This message has: Group, Date, Time, Milliseconds, Timezone.");
 
-Logger.OutputGroup = true;
-Logger.OutputTime = true;
-Logger.OutputLevel = true;
-Logger.LogInfo("This message has: Group, Time, Level.");
+console_log_target.output_severity = true;
+Logger.LogInfo("This message has: Group, Date, Time, Milliseconds, Timezone, Severity.");
 
-Logger.LogSeparator();
+console_log_target.output_severity_words = true;
+Logger.LogInfo("This message has: Group, Date, Time, Milliseconds, Timezone, Severity Words.");
+
+//==========================================
+Logger.LogSeparatorLine();
 try
 {
-	throw "This is an error!";
+	throw "This is a thrown exception!";
 }
 catch (exception)
 {
 	Logger.LogError(exception, exception);
 }
 
-Logger.LogSeparator();
+//==========================================
+Logger.LogSeparatorLine();
 Logger.LogInfo("Its all good, exiting now.");
 
 process.exit();

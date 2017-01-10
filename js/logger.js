@@ -5,156 +5,277 @@
 //
 //=====================================================================
 //=====================================================================
+/*
 
+# logger.js
+
+
+## Log Devices
+
+
+### Console
+
+```
+log_device: 'console'
+log_device: 'stdout'
+log_device: 'stderr'
+```
+
+### File
+
+Only available in NodeJS.
+
+```
+log_device: 'file',
+log_path: 'path/to/logs',
+log_filename: 'filename',
+log_extension: 'log',
+use_hourly_logfiles: true,
+use_daily_logfiles: true
+```
+
+*/
 
 "use strict";
 
+var Logger = {};
 
-module.exports = Logger;
 
-
-function Logger()
+//=====================================================================
+// Integrate with the browser environment.
+if (typeof window != 'undefined')
 {
-	return;
+	window['Logger'] = Logger;
 }
 
 
-//---------------------------------------------------------------------
-Logger.LogGroup = '';
-Logger.LogLevels = 'TDIWE';
-Logger.LogAggregateServer = '';
+//=====================================================================
+// Integrate with the nodejs environment.
+var npm_fs = null;
+var npm_path = null;
+if (typeof exports != 'undefined')
+{
+	var npm_fs = require('fs');
+	var npm_path = require('path');
+	exports.Logger = Logger;
+}
 
-Logger.OutputGroup = true;
-Logger.OutputTime = true;
-Logger.OutputLevel = true;
+
+//=====================================================================
+// Logger configuration object.
+Logger.Config = {
+	group: '',
+	always_use_utc: false,
+	targets: []
+}
 
 
-//---------------------------------------------------------------------
-Logger.FormatTimestamp =
-	function FormatTimestamp(date)
+//=====================================================================
+Logger.AddLogTarget =
+	function AddLogTarget(LogDevice, LogLevels)
 	{
-		// var timestamp = date.toISOString(); //"2011-12-19T15:28:46.493Z"
-		var timestamp =
-			date.getFullYear() +
-			"-" + ("0" + (date.getMonth() + 1)).slice(-2) +
-			"-" + ("0" + date.getDate()).slice(-2) +
-			" " + ("0" + date.getHours()).slice(-2) +
-			":" + ("0" + date.getMinutes()).slice(-2) +
-			":" + ("0" + date.getSeconds()).slice(-2) +
-			"." + ("000" + date.getMilliseconds()).slice(-4);
-		// " " + ("000" + date.getTimezoneOffset()).slice(-4);
-		return timestamp;
+		LogLevels = LogLevels || 'TDIWEF';
+		var log_target = {
+			log_device: LogDevice,
+			log_levels: LogLevels,
+			output_group: true,
+			output_date: true,
+			output_time: true,
+			output_milliseconds: true,
+			output_timezone: true,
+			output_severity: true,
+			output_severity_words: true,
+			// File specific
+			log_path: '',
+			log_filename: 'logger',
+			log_extension: 'log',
+			use_hourly_logfiles: false,
+			use_daily_logfiles: false
+
+		};
+		Logger.Config.targets.push(log_target);
+		return log_target;
 	}
 
 
-//---------------------------------------------------------------------
-Logger.GetTimestamp =
-	function GetTimestamp()
+// //---------------------------------------------------------------------
+// Logger.FormatTimestamp =
+// 	function FormatTimestamp(date)
+// 	{
+// 		// var timestamp = date.toISOString(); //"2011-12-19T15:28:46.493Z"
+// 		var timestamp =
+// 			date.getFullYear() +
+// 			"-" + ("0" + (date.getMonth() + 1)).slice(-2) +
+// 			"-" + ("0" + date.getDate()).slice(-2) +
+// 			" " + ("0" + date.getHours()).slice(-2) +
+// 			":" + ("0" + date.getMinutes()).slice(-2) +
+// 			":" + ("0" + date.getSeconds()).slice(-2) +
+// 			"." + ("000" + date.getMilliseconds()).slice(-4);
+// 		// " " + ("000" + date.getTimezoneOffset()).slice(-4);
+// 		return timestamp;
+// 	}
+
+
+// //---------------------------------------------------------------------
+// Logger.GetTimestamp =
+// 	function GetTimestamp()
+// 	{
+// 		return Logger.FormatTimestamp(new Date());
+// 	}
+
+
+//=====================================================================
+Logger.SendTextToLogTarget =
+	function SendTextToLogTarget(Timestamp, Text, LogTarget)
 	{
-		return Logger.FormatTimestamp(new Date());
-	}
-
-
-//---------------------------------------------------------------------
-Logger.SendLogAggregator =
-	function SendLogAggregator(Group, Level, Timestamp, Message)
-	{
-		if (!Logger.LogAggregateServer)
+		if ((LogTarget.log_device == 'console') || (LogTarget.log_device == 'stdout'))
 		{
-			return;
+			console.log(Text);
 		}
-		if (Logger.LogAggregateServer.length == 0)
+		if (LogTarget.log_device == 'stderr')
 		{
-			return;
+			console.error(Text);
 		}
-
-		//TODO:
-
+		else if (LogTarget.log_device == 'file')
+		{
+			if (npm_fs && npm_path)
+			{
+				var filename = npm_path.join(LogTarget.log_path, LogTarget.log_filename);
+				if (LogTarget.use_hourly_logfiles)
+				{
+					filename += '-' + Timestamp.toISOString.slice(0, 13).replace(/T/g, '-');
+				}
+				else if (LogTarget.use_daily_logfiles)
+				{
+					filename += '-' + Timestamp.toISOString.slice(0, 10);
+				}
+				if (LogTarget.log_extension)
+				{
+					filename += '.' + LogTarget.log_extension;
+				}
+				npm_fs.appendFileSync(filename, Text + "\n");
+			}
+		}
 		return;
 	}
 
 
-//---------------------------------------------------------------------
+//=====================================================================
 Logger.LogMessage =
-	function LogMessage(Message, Level, ExtraData)
+	function LogMessage(Message, Severity, ExtraData)
 	{
-		Level = Level || 'INFO';
-		var this_timestamp = Logger.GetTimestamp();
+		var date = new Date();
+		var log_entry = {};
 
-		// Get the log level of the message.
-		var log_level = Level.substr(0, 1).toUpperCase();
-		if (Logger.LogLevels.indexOf(log_level) == -1)
-		{
-			// Ignore message.
-			return null;
-		}
+		// Get the message group.
+		log_entry.group = Logger.Config.group;
 
-		// Get the log level.
-		if (log_level == 'T')
+		// Get the message timestamp.
+		log_entry.date = date.getFullYear() +
+			"-" + ("0" + (date.getMonth() + 1)).slice(-2) +
+			"-" + ("0" + date.getDate()).slice(-2);
+		log_entry.time = ("0" + date.getHours()).slice(-2) +
+			":" + ("0" + date.getMinutes()).slice(-2) +
+			":" + ("0" + date.getSeconds()).slice(-2);
+		log_entry.milliseconds = ("000" + date.getMilliseconds()).slice(-4);
+
+		// Get the timezone offset.
+		var timezone_minutes = date.getTimezoneOffset() % 60;
+		var timezone_hours = (date.getTimezoneOffset() - timezone_minutes) / 60;
+		log_entry.timezone = ("0" + timezone_hours).slice(-2) + ("0" + timezone_minutes).slice(-2);
+
+		// Get the message severity.
+		Severity = Severity || 'INFO';
+		log_entry.severity = Severity.substr(0, 1).toUpperCase();
+		if (log_entry.severity == 'T')
 		{
-			log_level = 'TRACE';
+			log_entry.severity_word = 'TRACE';
 		}
-		else if (log_level == 'D')
+		else if (log_entry.severity == 'D')
 		{
-			log_level = 'DEBUG';
+			log_entry.severity_word = 'DEBUG';
 		}
-		else if (log_level == 'I')
+		else if (log_entry.severity == 'I')
 		{
-			log_level = 'INFO ';
+			log_entry.severity_word = 'INFO ';
 		}
-		else if (log_level == 'W')
+		else if (log_entry.severity == 'W')
 		{
-			log_level = 'WARN ';
+			log_entry.severity_word = 'WARN ';
 		}
-		else if (log_level == 'E')
+		else if (log_entry.severity == 'E')
 		{
-			log_level = 'ERROR';
+			log_entry.severity_word = 'ERROR';
+		}
+		else if (log_entry.severity == 'F')
+		{
+			log_entry.severity_word = 'FATAL';
 		}
 		else
 		{
-			log_level = Level;
+			log_entry.severity_word = Severity;
 		}
 
-		// Construct the output message.
-		var out_message = '';
-		var left_side = ' | ';
-		var right_side = '';
-		if (Logger.OutputGroup)
-		{
-			out_message += left_side + Logger.LogGroup + right_side;
-		}
-		if (Logger.OutputTime)
-		{
-			out_message += left_side + this_timestamp + right_side;
-		}
-		if (Logger.OutputLevel)
-		{
-			out_message += left_side + log_level + right_side;
-		}
-		out_message += left_side + Message;
+		// Get the message.
+		log_entry.message = Message;
 
-		// Add the extra data.
-		if (ExtraData)
-		{
-			out_message += "\n" + JSON.stringify(ExtraData, undefined, "    ");
-		}
+		// Emit the log entry to the targets.
+		Logger.Config.targets.forEach(
+			function(log_target)
+			{
+				if (log_target.log_levels.indexOf(log_entry.severity) >= 0)
+				{
+					// Construct the output message.
+					var out_message = '';
+					var left_side = '| ';
+					var right_side = ' ';
+					if (log_target.output_group && Logger.Config.group)
+					{
+						out_message += left_side + Logger.Config.group + right_side;
+					}
+					if (log_target.output_date && log_entry.date)
+					{
+						out_message += left_side + log_entry.date + right_side;
+					}
+					if (log_target.output_time && log_entry.time)
+					{
+						out_message += left_side + log_entry.time + right_side;
+					}
+					if (log_target.output_milliseconds && log_entry.milliseconds)
+					{
+						out_message += left_side + log_entry.milliseconds + right_side;
+					}
+					if (log_target.output_timezone && log_entry.timezone)
+					{
+						out_message += left_side + log_entry.timezone + right_side;
+					}
+					if (log_target.output_severity_words)
+					{
+						out_message += left_side + log_entry.severity_word + right_side;
+					}
+					else if (log_target.output_severity)
+					{
+						out_message += left_side + log_entry.severity + right_side;
+					}
+					out_message += left_side + log_entry.message;
 
-		// Send message to the console.
-		if ((log_level == 'WARN') || (log_level == 'ERROR'))
-		{
-			console.error(out_message);
-		}
-		console.log(out_message);
+					// Add the extra data.
+					if (ExtraData)
+					{
+						out_message += "\n" + JSON.stringify(ExtraData, undefined, "    ");
+					}
 
-		// Send message to the log aggregator.
-		Logger.SendLogAggregator(Logger.LogGroup, Level, this_timestamp, Message);
+					// Emit the log entry
+					Logger.SendTextToLogTarget(date, out_message, log_target);
+				}
+			});
 
 		// Return the message.
-		return out_message;
+		return log_entry;
 	}
 
 
-//---------------------------------------------------------------------
+//=====================================================================
 Logger.LogTrace =
 	function LogTrace(Message, ExtraData)
 	{
@@ -185,33 +306,46 @@ Logger.LogError =
 	{
 		Logger.LogMessage(Message, 'ERROR', ExtraData);
 	}
-
-
-//---------------------------------------------------------------------
-Logger.LogBlank =
-	function LogBlank(Level)
+Logger.LogFatal =
+	function LogError(Message, ExtraData)
 	{
-		Logger.LogMessage('', Level);
-	}
-Logger.LogSeparator =
-	function LogSeparator(Level)
-	{
-		Logger.LogMessage('==========================================', Level);
+		Logger.LogMessage(Message, 'FATAL', ExtraData);
 	}
 
 
-//---------------------------------------------------------------------
+//=====================================================================
+Logger.LogBlankLine =
+	function LogBlankLine()
+	{
+		Logger.Config.targets.forEach(
+			function(log_target)
+			{
+				Logger.SendTextToLogTarget(new Date(), '', log_target);
+			});
+	}
+Logger.LogSeparatorLine =
+	function LogSeparatorLine()
+	{
+		Logger.Config.targets.forEach(
+			function(log_target)
+			{
+				Logger.SendTextToLogTarget(new Date(), '==========================================', log_target);
+			});
+	}
+
+
+//=====================================================================
 Logger.ObjectJson =
-	function DebugObject(SomeObject)
+	function ObjectJson(SomeObject)
 	{
 		return JSON.stringify(SomeObject, undefined, "    ");
 	}
 
 
-//---------------------------------------------------------------------
+//=====================================================================
 Logger.LogObject =
 	function LogObject(SomeObject)
 	{
-		this.LogMessage("\n" + this.ObjectJson(SomeObject));
+		Logger.LogMessage("\n" + Logger.ObjectJson(SomeObject));
 		return;
 	}
