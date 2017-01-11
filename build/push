@@ -1,2 +1,6 @@
 #!/bin/bash
-php build/push.php "$@"
+pushd `dirname $0` > /dev/null
+SCRIPTPATH=`pwd -P`
+popd > /dev/null
+
+php $SCRIPTPATH/push.php "$@"
