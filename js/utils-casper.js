@@ -27,8 +27,8 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	//=====================================================================
 	casper.on("error", function(msg, trace)
 	{
-		logger.LogMessage("[Error] " + msg);
-		logger.LogMessage("[Error trace] " + JSON.stringify(trace, undefined, 4));
+		logger.LogTrace("[Error] " + msg);
+		logger.LogTrace("[Error trace] " + JSON.stringify(trace, undefined, 4));
 		return;
 	});
 
@@ -36,7 +36,7 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	//=====================================================================
 	casper.on("run.complete", function()
 	{
-		logger.LogMessage("Execution complete.");
+		logger.LogTrace("Execution complete.");
 		this.exit(0);
 		return;
 	});
@@ -47,8 +47,8 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	{
 		if (casper.log_page_errors)
 		{
-			logger.LogMessage("[Remote Page Error] " + msg);
-			logger.LogMessage("[Remote Error trace] " + JSON.stringify(trace, undefined, 4));
+			logger.LogDebug("[Remote Page Error] " + msg);
+			logger.LogDebug("[Remote Error trace] " + JSON.stringify(trace, undefined, 4));
 		}
 		return;
 	});
@@ -59,7 +59,7 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	{
 		if (casper.log_remote_messages)
 		{
-			logger.LogMessage('[Remote Message] ' + msg);
+			logger.LogDebug('[Remote Message] ' + msg);
 		}
 		return;
 	});
@@ -106,7 +106,7 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 			{
 				if (this.exists(selector))
 				{
-					logger.LogMessage('ClickToDeath [' + selector + ']');
+					logger.LogTrace('ClickToDeath [' + selector + ']');
 					this.click(selector);
 					// this.wait(2000, ClickToDeath(selector));
 					this.ClickToDeath(selector);
@@ -143,8 +143,8 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	//=====================================================================
 	casper.ExitNow = function ExitNow(Status, Message)
 	{
-		logger.LogMessage(Message);
-		logger.LogMessage('CASPER WILL NOW EXIT!');
+		logger.LogTrace(Message);
+		logger.LogTrace('CASPER WILL NOW EXIT!');
 		this.exit(Status);
 		this.bypass(99999);
 		return;
