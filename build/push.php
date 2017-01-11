@@ -392,7 +392,7 @@ else
 	//=====================================================================
 
 
-	if( $do_release )
+	if( $do_npm_publish )
 	{
 		LogSeparator();
 		if( $test_mode )
@@ -405,6 +405,12 @@ else
 			LogText('Publishing to npm ...');
 			$result_lines = ExecuteCommand( 'npm publish' );
 		}
+	}
+	elseif( $do_release )
+	{
+		LogSeparator();
+		LogText( 'A new release was created but npm was not updated.' );
+		LogText( 'Please do a "npm publish" to support npm package distribution.' );
 	}
 
 
