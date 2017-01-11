@@ -28,11 +28,12 @@ function LogSeparator()
 //---------------------------------------------------------------------
 function PrintUsage()
 {
-	LogText( 'Usage: push [-t] [-i] [-r] -m "commit message"' );
-	LogText( "\t".'-t : Run push in test mode. No changes are made.' );
-	LogText( "\t".'-i : Print the project info and exit. No changes are made.' );
-	LogText( "\t".'-r : Increment the version number and create a new release.' );
-	LogText( "\t".'-m : Specify the message to be used for the commit. (required)' );
+	LogText( 'Usage: push [-t] [-i] [-r|-rn] -m "commit message"' );
+	LogText( "\t".'-t  : Run push in test mode. No changes are made.' );
+	LogText( "\t".'-i  : Print the project info and exit. No changes are made.' );
+	LogText( "\t".'-r  : Increment the version number and create a new release.' );
+	LogText( "\t".'-rn : Increment the version number, create a new release, and do an npm publish.' );
+	LogText( "\t".'-m  : Specify the message to be used for the commit. (required)' );
 	return;
 }
 
@@ -154,6 +155,7 @@ else
 $test_mode = false;
 $info_only = false;
 $do_release = false;
+$do_npm_publish = false;
 $commit_message = '';
 $arg_index = 1;
 while( $arg_index < count( $argv ) )
@@ -170,6 +172,11 @@ while( $arg_index < count( $argv ) )
 	elseif($arg == '-r')
 	{
 		$do_release = true;
+	}
+	elseif($arg == '-rn')
+	{
+		$do_release = true;
+		$do_npm_publish = true;
 	}
 	elseif($arg == '-m')
 	{
