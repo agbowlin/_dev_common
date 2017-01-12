@@ -223,6 +223,19 @@ $group = 'Database';
 
 
 //------------------------------------------
+// MONGOD
+//------------------------------------------
+$version = NewVersion( $group, 'mongod' );
+$stdout = RunCommand( 'mongod --version' );
+if( substr( $stdout, 0, 11 ) == 'db version ' )
+{
+	$stdout = substr( $stdout, 11 );
+	$version->Version = CleanVersion( $stdout );
+}
+$versions []= $version;
+
+
+//------------------------------------------
 // MYSQL (Client)
 //------------------------------------------
 $version = NewVersion( $group, 'mysql (client)' );
@@ -246,20 +259,6 @@ if( $stdout )
 	$version->Version = CleanVersion( $stdout );
 }
 $versions []= $version;
-
-
-//------------------------------------------
-// MONGOD
-//------------------------------------------
-$version = NewVersion( $group, 'mongod' );
-$stdout = RunCommand( 'mongod --version' );
-if( substr( $stdout, 0, 11 ) == 'db version ' )
-{
-	$stdout = substr( $stdout, 11 );
-	$version->Version = CleanVersion( $stdout );
-}
-$versions []= $version;
-
 
 
 //---------------------------------------------------------------------
@@ -391,36 +390,10 @@ $group = 'Tools';
 
 
 //------------------------------------------
-// NPM
-//------------------------------------------
-$version = NewVersion( $group, 'npm' );
-$stdout = RunCommand( 'npm --version' );
-$stdout = UntilChar( $stdout, "\n" );
-if( strlen( $stdout ) )
-{
-	$version->Version = CleanVersion( $stdout );
-}
-$versions []= $version;
-
-
-//------------------------------------------
 // BOWER
 //------------------------------------------
 $version = NewVersion( $group, 'bower' );
 $stdout = RunCommand( 'bower --version' );
-$stdout = UntilChar( $stdout, "\n" );
-if( strlen( $stdout ) )
-{
-	$version->Version = CleanVersion( $stdout );
-}
-$versions []= $version;
-
-
-//------------------------------------------
-// PHANTOMJS
-//------------------------------------------
-$version = NewVersion( $group, 'phantomjs' );
-$stdout = RunCommand( 'phantomjs --version' );
 $stdout = UntilChar( $stdout, "\n" );
 if( strlen( $stdout ) )
 {
@@ -450,6 +423,45 @@ $stdout = RunCommand( 'curl --version' );
 if( substr( $stdout, 0, 5 ) == 'curl ' )
 {
 	$stdout = substr( $stdout, 5 );
+	$version->Version = CleanVersion( $stdout );
+}
+$versions []= $version;
+
+
+//------------------------------------------
+// GIT
+//------------------------------------------
+$version = NewVersion( $group, 'git' );
+$stdout = RunCommand( 'git --version' );
+if( substr( $stdout, 0, 12 ) == 'git version ' )
+{
+	$stdout = substr( $stdout, 12 );
+	$version->Version = CleanVersion( $stdout );
+}
+$versions []= $version;
+
+
+//------------------------------------------
+// NPM
+//------------------------------------------
+$version = NewVersion( $group, 'npm' );
+$stdout = RunCommand( 'npm --version' );
+$stdout = UntilChar( $stdout, "\n" );
+if( strlen( $stdout ) )
+{
+	$version->Version = CleanVersion( $stdout );
+}
+$versions []= $version;
+
+
+//------------------------------------------
+// PHANTOMJS
+//------------------------------------------
+$version = NewVersion( $group, 'phantomjs' );
+$stdout = RunCommand( 'phantomjs --version' );
+$stdout = UntilChar( $stdout, "\n" );
+if( strlen( $stdout ) )
+{
 	$version->Version = CleanVersion( $stdout );
 }
 $versions []= $version;
