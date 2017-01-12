@@ -194,7 +194,7 @@ while( $arg_index < count( $argv ) )
 	}
 	$arg_index++;
 }
-if (!$commit_message)
+if ( !$commit_message && !$info_only )
 {
 	LogText('WARNING: Commit message is missing!');
 }
