@@ -274,7 +274,35 @@ $group = 'Network';
 
 
 //------------------------------------------
-// NodeJS
+// APACHE2
+//------------------------------------------
+$version = NewVersion( $group, 'apache2' );
+$stdout = RunCommand( 'apache2 -v' );
+$stdout = UntilChar( $stdout, "\n" );
+if( substr( $stdout, 0, 23 ) == 'Server version: Apache/' )
+{
+	$stdout = substr( $stdout, 23 );
+	$version->Version = CleanVersion( $stdout );
+}
+$versions []= $version;
+
+
+//------------------------------------------
+// NGINX
+//------------------------------------------
+$version = NewVersion( $group, 'nginx' );
+$stdout = RunCommand( 'nginx -v' );
+$stdout = UntilChar( $stdout, "\n" );
+if( substr( $stdout, 0, 21 ) == 'nginx version: nginx/' )
+{
+	$stdout = substr( $stdout, 21 );
+	$version->Version = CleanVersion( $stdout );
+}
+$versions []= $version;
+
+
+//------------------------------------------
+// NODEJS
 //------------------------------------------
 $version = NewVersion( $group, 'node' );
 $stdout = RunCommand( 'node --version' );
