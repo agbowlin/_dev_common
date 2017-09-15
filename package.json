@@ -1,4 +1,48 @@
 {
     "name": "_dev_common",
-    "version": "0.0.3"
+    "version": "0.0.4",
+    "homepage": "https://github.com/agbowlin/_dev_common",
+    "description": "Common development code for various platforms.",
+    "authors": [
+        {
+            "name": "Andre G. Bowlin",
+            "email": "agbowlin@gmail.com",
+            "homepage": "http://liquicode.com"
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/agbowlin/_dev_common.git"
+    },
+    "license": "MIT",
+    "keywords": [
+        "util",
+        "functional",
+        "server",
+        "client",
+        "browser",
+        "nodejs",
+        "log",
+        "logger",
+        "logging"
+    ],
+    "files": [
+        "package.json",
+        "bower.json",
+        "LICENSE",
+        "README.md",
+        "bash/*",
+        "build/*",
+        "js/*",
+        "php/*"
+    ],
+    "ignore": [
+        ".*",
+        "bower_components",
+        "node_modules",
+        "*.log"
+    ],
+    "devDependencies": {
+
+    }
 }
