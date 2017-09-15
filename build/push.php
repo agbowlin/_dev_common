@@ -198,6 +198,11 @@ if ( !$commit_message && !$info_only )
 {
 	LogText('WARNING: Commit message is missing!');
 }
+if ( !$project_name )
+{
+	$test_mode = true;
+	LogText('WARNING: Required file [package.json] is missing. Force enabling the test mode!');
+}
 
 
 //---------------------------------------------------------------------
@@ -278,6 +283,7 @@ else
 	if( $do_release )
 	{
 		LogSeparator();
+		// Make sure we have 
 		if( $test_mode )
 		{
 			LogText("Applying new version number ... (in test mode)");
@@ -424,6 +430,6 @@ else
 
 //---------------------------------------------------------------------
 LogSeparator();
-LogText('Finished.');
+LogText('Finished push.');
 LogSeparator();
 
