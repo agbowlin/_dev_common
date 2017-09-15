@@ -1,6 +1,6 @@
 {
-    "name": "_dev_common",
-    "version": "0.0.4",
+    "name": "liquicode_dev_common",
+    "version": "0.0.5",
     "homepage": "https://github.com/agbowlin/_dev_common",
     "description": "Common development code for various platforms.",
     "authors": [
