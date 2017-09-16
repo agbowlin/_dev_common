@@ -27,8 +27,11 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	//=====================================================================
 	casper.on("error", function(msg, trace)
 	{
-		logger.LogTrace("[Error] " + msg);
-		logger.LogTrace("[Error trace] " + JSON.stringify(trace, undefined, 4));
+		if (logger)
+		{
+			logger.LogTrace("[Error] " + msg);
+			logger.LogTrace("[Error trace] " + JSON.stringify(trace, undefined, 4));
+		}
 		return;
 	});
 
@@ -36,7 +39,10 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	//=====================================================================
 	casper.on("run.complete", function()
 	{
-		logger.LogTrace("Execution complete.");
+		if (logger)
+		{
+			logger.LogTrace("Execution complete.");
+		}
 		this.exit(0);
 		return;
 	});
@@ -47,8 +53,11 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	{
 		if (casper.log_page_errors)
 		{
-			logger.LogDebug("[Remote Page Error] " + msg);
-			logger.LogDebug("[Remote Error trace] " + JSON.stringify(trace, undefined, 4));
+			if (logger)
+			{
+				logger.LogDebug("[Remote Page Error] " + msg);
+				logger.LogDebug("[Remote Error trace] " + JSON.stringify(trace, undefined, 4));
+			}
 		}
 		return;
 	});
@@ -59,7 +68,10 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	{
 		if (casper.log_remote_messages)
 		{
-			logger.LogDebug('[Remote Message] ' + msg);
+			if (logger)
+			{
+				logger.LogDebug('[Remote Message] ' + msg);
+			}
 		}
 		return;
 	});
@@ -106,14 +118,16 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 			{
 				if (this.exists(selector))
 				{
-					logger.LogTrace('ClickToDeath [' + selector + ']');
+					if (logger)
+					{
+						logger.LogTrace('ClickToDeath [' + selector + ']');
+					}
 					this.click(selector);
 					// this.wait(2000, ClickToDeath(selector));
 					this.ClickToDeath(selector);
 				}
 			},
-			function OnTimeout()
-			{},
+			function OnTimeout() {},
 			timeout_ms);
 
 		return;
@@ -143,8 +157,14 @@ function Utils_Casper(casper, logger, log_page_errors, log_remote_messages)
 	//=====================================================================
 	casper.ExitNow = function ExitNow(Status, Message)
 	{
-		logger.LogTrace(Message);
-		logger.LogTrace('CASPER WILL NOW EXIT!');
+		if (logger)
+		{
+			if (Message)
+			{
+				logger.LogTrace(Message);
+			}
+			logger.LogTrace('CASPER WILL NOW EXIT!');
+		}
 		this.exit(Status);
 		this.bypass(99999);
 		return;
