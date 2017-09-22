@@ -116,6 +116,7 @@ if ($file_content)
 	if ($npm_config->version != $project_version)
 	{
 		LogText('WARNING: The npm project version does not match the version file!');
+		LogText('WARNING: The file [package.json] may be corrupt.');
 	}
 }
 else
@@ -136,10 +137,12 @@ if ($file_content)
 	if ($bower_config->name != $npm_config->name)
 	{
 		LogText('WARNING: The bower project name does not match the npm project name!');
+		LogText('WARNING: The file [bower.json] may be corrupt.');
 	}
 	if ($bower_config->version != $project_version)
 	{
 		LogText('WARNING: The bower project version does not match the version file!');
+		LogText('WARNING: The file [bower.json] may be corrupt.');
 	}
 }
 else
@@ -202,6 +205,7 @@ if ( !$project_name )
 {
 	$test_mode = true;
 	LogText('WARNING: Required file [package.json] is missing. Force enabling the test mode!');
+	LogText('WARNING: The file [package.json] may be corrupt.');
 }
 
 
