@@ -21,9 +21,10 @@
         "server"
     ],
     "bin": {
-        "lqprocmon": "./bash/procmon",
-        "lqversions": "./bash/versions",
-        "versions.php": "./bash/versions.php",
+        "ldc-procmon":	"bash/procmon",
+        "ldc-versions":	"bash/versions.php",
+        "ldc-pull":		"bash/pull.sh",
+        "ldc-push":		"bash/push.php",
         "lqpull": "./build/pull",
         "pull.sh": "./build/pull.sh",
         "lqpush": "./build/push",
