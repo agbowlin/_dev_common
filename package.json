@@ -23,8 +23,11 @@
     "bin": {
         "lqprocmon": "./bash/procmon",
         "lqversions": "./bash/versions",
+        "versions.php": "./bash/versions.php",
         "lqpull": "./build/pull",
-        "lqpush": "./build/push"
+        "pull.sh": "./build/pull.sh",
+        "lqpush": "./build/push",
+        "push.php": "./build/push.php"
     },
     "files": [
         "package.json",
