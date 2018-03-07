@@ -1,6 +1,6 @@
 {
     "name": "liquicode_dev_common",
-    "version": "0.0.19",
+    "version": "0.0.20",
     "homepage": "https://github.com/agbowlin/_dev_common",
     "description": "Common development code for various platforms.",
     "authors": [
@@ -21,14 +21,10 @@
         "server"
     ],
     "bin": {
-        "ldc-procmon":	"bash/procmon",
-        "ldc-versions":	"bash/versions.php",
-        "ldc-pull":		"build/pull.sh",
-        "ldc-push":		"build/push.php",
-        "lqpull": "./build/pull",
-        "pull.sh": "./build/pull.sh",
-        "lqpush": "./build/push",
-        "push.php": "./build/push.php"
+        "ldc-procmon": "bash/procmon",
+        "ldc-versions": "bash/versions.php",
+        "ldc-pull": "build/pull.sh",
+        "ldc-push": "build/push.php"
     },
     "files": [
         "package.json",
