@@ -23,8 +23,8 @@
     "bin": {
         "ldc-procmon":	"bash/procmon",
         "ldc-versions":	"bash/versions.php",
-        "ldc-pull":		"bash/pull.sh",
-        "ldc-push":		"bash/push.php",
+        "ldc-pull":		"build/pull.sh",
+        "ldc-push":		"build/push.php",
         "lqpull": "./build/pull",
         "pull.sh": "./build/pull.sh",
         "lqpush": "./build/push",
