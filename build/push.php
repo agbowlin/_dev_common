@@ -126,6 +126,11 @@ else
 	$npm_config->version = $project_version;
 }
 
+$repository_url = '';
+if($npm_config->repository && $npm_config->repository->url){
+	$repository_url = $npm_config->repository->url;
+}
+
 
 //---------------------------------------------------------------------
 // Load the bower config.
@@ -225,6 +230,7 @@ LogSeparator();
 LogText("Push: " . $project_name);
 LogSeparator();
 LogText("   Working Folder : " . $working_directory);
+LogText("   Repository URL : " . $repository_url);
 LogText("     Project Name : " . $project_name);
 LogText("  Current Version : " . $project_version);
 if( $do_release )
