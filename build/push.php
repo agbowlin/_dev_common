@@ -44,6 +44,7 @@ function GetFileContents($Filename, $Log)
 	if (file_exists($Filename))
 	{
 		$file_content = file_get_contents($Filename);
+		LogText('... loaded file ['.$Filename.'], '.strlen($file_content).' bytes');
 		return $file_content;
 	}
 	else
@@ -89,12 +90,14 @@ LogText('Initializing push ...');
 // Initialize some working variables.
 $working_directory = getcwd();
 
+$project_name = '';
+$project_version = '';
+$repository_url = '';
+
 
 //---------------------------------------------------------------------
 // Get the project version.
-$project_name = '';
-$project_version = '';
-$file_content = GetFileContents('VERSION', true);
+$file_content = GetFileContents($working_directory.'/VERSION', true);
 if ($file_content)
 {
 	$project_version = $file_content;
@@ -108,50 +111,64 @@ else
 //---------------------------------------------------------------------
 // Load the npm config.
 $npm_config = null;
-$file_content = GetFileContents('package.json', true);
+$file_content = GetFileContents($working_directory.'/package.json', true);
 if ($file_content)
 {
 	$npm_config = json_decode($file_content);
-	$project_name = $npm_config->name;
-	if ($npm_config->version != $project_version)
+	if( json_last_error() === JSON_ERROR_NONE )
 	{
-		LogText('WARNING: The npm project version does not match the version file!');
-		LogText('WARNING: The file [package.json] may be corrupt.');
+		$project_name = $npm_config->name;
+		if ($npm_config->version != $project_version)
+		{
+			LogText('!!! WARNING: The npm project version does not match the version file!');
+		}
+		if( $npm_config->repository && $npm_config->repository->url )
+		{
+			$repository_url = $npm_config->repository->url;
+		}
 	}
+	else
+	{ 
+		LogText('*** JSON_ERROR: '.json_last_error_msg());
+	} 
 }
-else
+
+if( !$npm_config )
 {
+	LogText('!!! WARNING: The file [package.json] may be missing or corrupt.');
 	$npm_config = new stdClass();
 	$npm_config->name = $project_name;
 	$npm_config->version = $project_version;
-}
-
-$repository_url = '';
-if($npm_config->repository && $npm_config->repository->url){
-	$repository_url = $npm_config->repository->url;
 }
 
 
 //---------------------------------------------------------------------
 // Load the bower config.
 $bower_config = null;
-$file_content = GetFileContents('bower.json', true);
+$file_content = GetFileContents($working_directory.'/bower.json', true);
 if ($file_content)
 {
 	$bower_config = json_decode($file_content);
-	if ($bower_config->name != $npm_config->name)
+	if( json_last_error() === JSON_ERROR_NONE )
 	{
-		LogText('WARNING: The bower project name does not match the npm project name!');
-		LogText('WARNING: The file [bower.json] may be corrupt.');
+		if ($bower_config->name != $npm_config->name)
+		{
+			LogText('!!! WARNING: The bower project name does not match the npm project name!');
+		}
+		if ($bower_config->version != $project_version)
+		{
+			LogText('!!! WARNING: The bower project version does not match the version file!');
+		}
 	}
-	if ($bower_config->version != $project_version)
-	{
-		LogText('WARNING: The bower project version does not match the version file!');
-		LogText('WARNING: The file [bower.json] may be corrupt.');
-	}
+	else
+	{ 
+		LogText('*** JSON_ERROR: '.json_last_error_msg());
+	} 
 }
-else
+
+if( !$bower_config )
 {
+	LogText('!!! WARNING: The file [bower.json] may be missing or corrupt.');
 	$bower_config = new stdClass();
 	$bower_config->name = $project_name;
 	$bower_config->version = $project_version;
@@ -196,7 +213,7 @@ while( $arg_index < count( $argv ) )
 	}
 	else
 	{
-		LogText('ERROR: Unknown parameter: ['.$arg.']');
+		LogText('*** ERROR: Unknown parameter: ['.$arg.']');
 		PrintUsage();
 		exit();
 	}
@@ -204,13 +221,13 @@ while( $arg_index < count( $argv ) )
 }
 if ( !$commit_message && !$info_only )
 {
-	LogText('WARNING: Commit message is missing!');
+	LogText('!!! WARNING: Commit message is missing!');
 }
 if ( !$project_name )
 {
 	$test_mode = true;
-	LogText('WARNING: Required file [package.json] is missing. Force enabling the test mode!');
-	LogText('WARNING: The file [package.json] may be corrupt.');
+	LogText('!!! WARNING: Required file [package.json] is missing. Force enabling the test mode!');
+	LogText('!!! WARNING: The file [package.json] may be corrupt.');
 }
 
 
@@ -440,6 +457,6 @@ else
 
 //---------------------------------------------------------------------
 LogSeparator();
-LogText('Finished push.');
+LogText('~~~ Finished push.');
 LogSeparator();
 
